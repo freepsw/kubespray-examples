@@ -1,0 +1,52 @@
+---
+
+# - name: Test connections
+#   shell: ls -al
+#   register: output_msg
+
+# - name: Print results
+#   debug: msg='{{ output_msg }}'
+
+- name: STEP 0. Copy necessary files for installing a kfserving to user home directory
+  copy:
+      src: "install-kfserving.tar.gz"
+      dest: "~/"
+
+- name: STEP 0. Unarchive the copied file 
+  unarchive:
+    src: ~/install-kfserving.tar.gz
+    dest: ~/
+    remote_src: yes
+
+- name: STEP 0. Give execution permissions to a quick_install.sh file
+  file:
+    path: ~/install-kfserving/quick_install.sh
+    mode: a+x
+
+- name: STEP 1. Add usr/loca/bin to PATH for kubectl 
+  shell: echo $PATH
+  args:
+    executable: /bin/bash
+  register: result_msg
+
+# - debug: var=result_msg.stdout
+
+- name: STEP 1. Add usr/loca/bin to PATH for kubectl 
+  lineinfile:
+    path: /etc/environment
+    line: 'PATH="{{ result_msg.stdout }}:/usr/local/bin"'
+    regexp: '^PATH='
+  when: '"/usr/local/bin" not in result_msg.stdout'
+
+- name: STEP 1. Run a shell scipts to install kfserving 
+  shell: ./quick_install.sh
+  args:
+    chdir: ~/install-kfserving
+    executable: /bin/bash
+  register: result_msg
+  ignore_errors: True
+
+- name: STEP 2. Check error messages  
+  fail:
+    msg: Failed to install kfserving 
+  when: '"ERROR" in result_msg.stdout'

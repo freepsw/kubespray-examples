@@ -1,0 +1,49 @@
+- name: 1. Set security configuration on all nodes
+  hosts: all
+  gather_facts: no
+  tasks:
+  - name : Disable SELinux
+    selinux:
+      state: disabled
+    become: yes
+
+  # https://www.cyberciti.biz/faq/disable-selinux-on-centos-7-rhel-7-fedora-linux/
+  - name: Disabling SELinux permanently
+    shell: sed -i "s/^SELINUX\=enforcing/SELINUX\=disabled/g" /etc/selinux/config
+    check_mode: no
+    ignore_errors: yes
+    become: yes
+
+  - name: Enable service httpd and ensure it is not masked
+    systemd:
+      name: firewalld
+      state: stopped
+      enabled: no
+    become: yes
+    register: result_msg
+
+  - name : Set ip forwarding on in /proc and verify token value with the sysctl command
+    sysctl:
+      name: net.ipv4.ip_forward
+      value: '1'
+      sysctl_set: yes
+    become: yes
+
+  # - name: Enable br_netfilter Kernel Module
+  #   shell: |
+  #     modprobe br_netfilter
+  #     echo "br_netfilter" > /etc/modules-load.d/br_netfilter.conf
+  #     echo "net.bridge.bridge-nf-call-iptables=1" >> /etc/sysctl.conf    
+
+  - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+    shell: /usr/sbin/swapoff -a
+
+  - name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+    replace:
+      path: /etc/fstab
+      regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+      replace: '# \1'
+    become: yes
+
+
+

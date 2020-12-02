@@ -1,0 +1,45 @@
+- name: Test Utils
+  hosts: all
+  gather_facts: no
+  tasks:
+  - name: Test connections
+    shell: ls -al
+    register: output_msg
+
+  - name: Print results
+    debug: msg='{{ output_msg }}'
+
+  - debug: msg="{{ playbook_dir }}"
+
+  - name: print host vars
+    debug: msg="{{ inventory_hostname }}"
+
+  - debug: var=ansible_all_ipv4_addresses
+
+  - debug: var=groups['kube-master'][0]
+  - debug: var=ansible_env.HOME
+
+
+
+  # - debug: var=hostvars[inventory_hostname]['ansible_default_ipv4']['address']
+  # - debug:  
+  #     msg: "{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
+  #   with_items:
+  #    - "{{ groups['all'] }}"
+
+  # - debug: 
+  #     var: "{{ hostvars[item]['ansible_eth1']['ipv4']['address'] }}"
+  #     with_items: groups['all']
+
+
+  # - name: fail on validation errors
+  #   k8s:
+  #     state: present
+  #     src: deployment.yaml
+  #     validate:
+  #       fail_on_error: yes
+
+  # - name: Create a Deployment by reading the definition from a local file
+  #   k8s:
+  #     state: present
+  #     src: deployment.yml

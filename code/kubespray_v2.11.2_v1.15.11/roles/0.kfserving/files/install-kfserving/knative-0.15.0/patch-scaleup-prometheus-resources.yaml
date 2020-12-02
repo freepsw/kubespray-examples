@@ -1,0 +1,65 @@
+spec:
+  replicas: 2
+  podManagementPolicy: Parallel
+  serviceName: prometheus-system
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        serving.knative.dev/release: "v0.14.0"
+    spec:
+      containers:
+      - args:
+        - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+        - --storage.tsdb.retention=2d
+        - --storage.tsdb.no-lockfile
+        - --web.enable-lifecycle
+        - --web.route-prefix=/
+        image: prom/prometheus:v2.2.1
+        imagePullPolicy: IfNotPresent
+        name: prometheus
+        ports:
+        - containerPort: 9090
+          name: web
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: web
+            scheme: HTTP
+          initialDelaySeconds: 30
+          failureThreshold: 10
+          timeoutSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: web
+            scheme: HTTP
+          failureThreshold: 10
+          timeoutSeconds: 3
+        resources:
+          limits:
+            memory: 3000Mi
+          requests:
+            memory: 1100Mi
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - name: prometheus-config-volume
+          mountPath: /etc/prometheus
+        - name: prometheus-storage-volume
+          mountPath: /prometheus
+      serviceAccountName: prometheus-system
+      terminationGracePeriodSeconds: 600
+      volumes:
+      - name: prometheus-config-volume
+        configMap:
+          defaultMode: 420
+          name: prometheus-scrape-config
+      - name: prometheus-storage-volume
+        emptyDir: {}
+  updateStrategy:
+    type: RollingUpdate

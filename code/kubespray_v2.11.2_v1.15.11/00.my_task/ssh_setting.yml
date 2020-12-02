@@ -1,0 +1,27 @@
+  # https://ossian.tistory.com/97 참고 
+  - name : generate the ssh key using ssh-keygen
+    connection: local
+    command: "ssh-keygen -b 2048 -t rsa -f ~/.ssh/freepsw_ssh -q -N ''"
+    ignore_errors: yes 
+    run_once: true
+
+
+  - name : read the ssh public key contents
+    connection: local
+    command: "cat ~/.ssh/freepsw_ssh.pub"
+    register: id_pub
+    run_once: true
+
+  - name : register ssh public key to ansible-node
+    lineinfile:
+      path: ~/.ssh/authorized_keys
+      line: "{{ id_pub.stdout }}"
+
+
+  # - name : copy ssh public key to remote server
+  #   connection: local
+  #   command: " ssh-copy-id -i ~/.ssh/freepsw_ssh.pub  -o StrictHostKeyChecking=no  freepsw@{{ hostvars[item]['ansible_default_ipv4']['address'] }}"
+  #   with_items:
+  #    - "{{ groups['all'] }}"  
+  #   register: id_pub
+  #   run_once: true

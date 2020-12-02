@@ -1,0 +1,22 @@
+    # 01. Install kubespary 
+    - name: Install Python
+      shell: yum -y install python3 python3-pip
+      become: yes
+
+    - name: Copy kubespray scripts to the master node 
+      copy:
+        src: ./00.my_custom_task/data/kubespray.tar
+        dest: ~/kubespray.tar
+        mode: '0644'
+
+    - name: Unarchive a file that is already on the remote machine
+      unarchive:
+        src: ~/kubespray.tar
+        dest: ~/
+        remote_src: yes
+
+    - name: Install required packages for kubespray
+      shell: 
+        cmd: pip3 install --user -r requirements.txt
+        chdir: ~/kubespray
+    # - import_tasks: ./00.my_custom_task/set_k8s_env.yml

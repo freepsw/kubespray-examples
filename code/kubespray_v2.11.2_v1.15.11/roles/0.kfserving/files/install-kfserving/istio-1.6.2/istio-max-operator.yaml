@@ -1,0 +1,60 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  values:
+    global:
+      proxy:
+        autoInject: disabled
+      useMCP: false
+      # The third-party-jwt is not enabled on all k8s.
+      # See: https://istio.io/docs/ops/best-practices/security/#configure-third-party-service-account-tokens
+      jwtPolicy: first-party-jwt
+  addonComponents:
+    pilot:
+      enabled: true
+    tracing:
+      enabled: false
+    kiali:
+      enabled: false
+    prometheus:
+      enabled: false
+  components:
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+      - name: cluster-local-gateway
+        enabled: true
+        label:
+          istio: cluster-local-gateway
+          app: cluster-local-gateway
+        k8s:
+          service:
+            type: ClusterIP
+            ports:
+            - port: 15020
+              name: status-port
+            - port: 80
+              name: http2
+            - port: 443
+              name: https
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+    pilot:
+      enabled: true
+      k8s:
+        env:
+        - name: PILOT_TRACE_SAMPLING
+          value: "10" # 부하를 줄이기 위해서 sampling 비중 줄임
+        resources: # 운영환경에서 자원 확장
+          requests:
+            cpu: 1000m
+            memory: 3096Mi
+  values:
+    gateways:
+      istio-ingressgateway:
+        type: NodePort

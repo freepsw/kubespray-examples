@@ -1,0 +1,50 @@
+---
+
+
+# Tesla V100 (Cuda 11.0) _ Seoul Univ
+nvidia_accelerator_enabled: true
+nvidia_driver_version: "450.51.06"
+nvidia_gpu_tesla_base_url: https://us.download.nvidia.com/tesla/
+nvidia_gpu_gtx_base_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/
+nvidia_gpu_flavor: tesla
+nvidia_url_end: "{{ nvidia_driver_version }}/NVIDIA-Linux-x86_64-{{ nvidia_driver_version }}.run"
+nvidia_driver_install_container: true
+nvidia_driver_install_centos_container: atzedevries/nvidia-centos-driver-installer:2
+nvidia_driver_install_ubuntu_container: gcr.io/google-containers/ubuntu-nvidia-driver-installer@sha256:7df76a0f0a17294e86f691c81de6bbb7c04a1b4b3d4ea4e7e2cccdc42e1f6d63
+nvidia_driver_install_supported: true
+nvidia_gpu_device_plugin_container: "k8s.gcr.io/nvidia-gpu-device-plugin@sha256:0842734032018be107fa2490c98156992911e3e1f2a21e059ff0105b07dd8e9e"
+nvidia_gpu_nodes: [node1]
+nvidia_gpu_device_plugin_memory: 30Mi
+
+
+# # Tesla V100 (Cuda 11.0) _ Aju Univ
+# nvidia_accelerator_enabled: true
+# nvidia_driver_version: "450.80.02"
+# nvidia_gpu_tesla_base_url: https://us.download.nvidia.com/tesla/
+# nvidia_gpu_gtx_base_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/
+# nvidia_gpu_flavor: tesla
+# nvidia_url_end: "{{ nvidia_driver_version }}/NVIDIA-Linux-x86_64-{{ nvidia_driver_version }}.run"
+# nvidia_driver_install_container: true
+# nvidia_driver_install_centos_container: atzedevries/nvidia-centos-driver-installer:2
+# nvidia_driver_install_ubuntu_container: gcr.io/google-containers/ubuntu-nvidia-driver-installer@sha256:7df76a0f0a17294e86f691c81de6bbb7c04a1b4b3d4ea4e7e2cccdc42e1f6d63
+# nvidia_driver_install_supported: true
+# nvidia_gpu_device_plugin_container: "k8s.gcr.io/nvidia-gpu-device-plugin@sha256:0842734032018be107fa2490c98156992911e3e1f2a21e059ff0105b07dd8e9e"
+# nvidia_gpu_nodes: [node1]
+# nvidia_gpu_device_plugin_memory: 30Mi
+
+
+# Tesla T4 cuda 11.0
+# nvidia_accelerator_enabled: true 
+# nvidia_driver_version: "450.51.06" # gpu driver의 버전 정보 
+# nvidia_gpu_tesla_base_url: https://us.download.nvidia.com/tesla/
+# nvidia_gpu_gtx_base_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/
+# nvidia_gpu_flavor: tesla
+# nvidia_url_end: "{{ nvidia_driver_version }}/NVIDIA-Linux-x86_64-{{ nvidia_driver_version }}.run"
+# nvidia_driver_install_container: true
+# nvidia_driver_install_centos_container: atzedevries/nvidia-centos-driver-installer:2
+# nvidia_driver_install_ubuntu_container: gcr.io/google-containers/ubuntu-nvidia-driver-installer@sha256:7df76a0f0a17294e86f691c81de6bbb7c04a1b4b3d4ea4e7e2cccdc42e1f6d63
+# nvidia_driver_install_supported: true
+# nvidia_gpu_device_plugin_container: "k8s.gcr.io/nvidia-gpu-device-plugin@sha256:0842734032018be107fa2490c98156992911e3e1f2a21e059ff0105b07dd8e9e"
+# # 위의 k8s-cluster.yml에서 지정한 것은 k8s taint를 설정하기 위한 용도임. (따라서 여기서도 지정해야 함)
+# nvidia_gpu_nodes: [node1] # gpu를 설치할 node name을 지정 (inventory.ini에 정의된 노드명)
+# nvidia_gpu_device_plugin_memory: 30Mi

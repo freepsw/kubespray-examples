@@ -1,0 +1,8 @@
+---
+# kube_cert_group: kube-cert
+# etcd_data_dir: "/var/lib/etcd"
+
+# addusers:
+#   etcd:
+#     name: etcd
+

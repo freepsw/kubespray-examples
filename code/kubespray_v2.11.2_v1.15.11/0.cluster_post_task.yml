@@ -1,0 +1,123 @@
+---
+
+# STEP 1.kubectl path 추가 (전체 node)
+- hosts: all
+  gather_facts: False
+  tasks:
+  - name: STEP 1. Check system path wheather "/usr/local/bin" is included
+    shell: echo $PATH
+    args:
+      executable: /bin/bash
+    register: result_msg
+
+  - debug: var=result_msg.stdout
+
+  - name: STEP 1. Add usr/loca/bin to PATH for kubectl 
+    lineinfile:
+      path: /etc/environment
+      line: 'PATH="{{ result_msg.stdout }}:/usr/local/bin"'
+      regexp: '^PATH='
+    when: '"/usr/local/bin" not in result_msg.stdout'
+
+
+# STEP 2. untaint gpu key on gpu node
+- hosts: master
+  gather_facts: False
+  tasks:
+  - name: STEP 2. untaint gpu key on gpu node
+    shell: kubectl taint nodes node1 nvidia.com/gpu-
+    args:
+      executable: /bin/bash
+    ignore_errors: True
+
+  - name : STEP 2. Fetch kube config contents to local
+    fetch:
+      src: ~/.kube/config
+      dest: "{{ playbook_dir }}/00.my_task/data/master-kube_config/"
+      flat: yes
+    run_once: true
+
+  - name : STEP 2. Fetch kubectl binary file to local
+    fetch:
+      src: "{{ bin_dir }}/kubectl"
+      dest: "{{ playbook_dir }}/00.my_task/data/master-kube_config/"
+      flat: yes
+    run_once: true
+
+# STEP 3. install kubectl on all worker nodes and config file to all worker nodes
+- hosts: kube-node
+  gather_facts: False
+  tasks:
+
+  - name: Install | Copy kubectl binary from local to k8s worker nodes
+    synchronize:
+      src: "{{ playbook_dir }}/00.my_task/data/master-kube_config/kubectl"
+      dest: "{{ bin_dir }}/kubectl"
+      compress: no
+      perms: yes
+      owner: no
+      group: no
+    changed_when: false
+
+
+  - name: Set kubectl binary permissions
+    file:
+      path: "{{ bin_dir }}/kubectl"
+      mode: "0755"
+      state: file
+
+  - name: STEP 3. Create a directory if it does not exist
+    file:
+      path: ~/.kube/
+      state: directory
+      mode: '0755'
+
+  - name: Copy a ".kube" directory on the remote machine for editing
+    copy:
+      src: "{{ playbook_dir }}/00.my_task/data/master-kube_config/config"
+      dest: ~/.kube/config
+      mode: '0644'
+
+
+
+
+
+#     # - import_tasks: ./00.my_custom_task/ssh_setting.yml
+#   # https://ossian.tistory.com/97 참고 
+#   - name : generate the ssh key using ssh-keygen
+#     command: "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
+#     ignore_errors: yes 
+#     run_once: true
+
+#   - name : read the ssh public key contents
+#     command: "cat ~/.ssh/id_rsa.pub"
+#     register: id_pub
+#     run_once: true
+
+#   # - debug: var=ssh_pub_key
+#   - name: Remove file (delete file)
+#     file:
+#       path: ./ssh_pub.txt
+#       state: absent
+
+#   - name : write the ssh public key contents
+#     connection: local
+#     lineinfile:
+#         dest: ./ssh_pub.txt
+#         line: "{{ id_pub.stdout }}"
+#         state: present
+#         insertafter: EOF
+#         create: True
+
+# - hosts: all
+#   gather_facts: False
+#   tasks:
+#     # - import_tasks: ./00.my_custom_task/ssh_setting.yml
+
+#   - name : read the ssh public key contents
+#     debug: msg="{{lookup('file', 'ssh_pub.txt') }}"
+
+#   - name : register ssh public key to ansible-node
+#     lineinfile:
+#       path: ~/.ssh/authorized_keys
+#       line: "{{lookup('file', 'ssh_pub.txt') }}"

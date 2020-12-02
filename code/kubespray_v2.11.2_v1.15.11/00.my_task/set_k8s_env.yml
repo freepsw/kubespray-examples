@@ -1,0 +1,45 @@
+
+- name: line insert
+  lineinfile:
+    path: "{{ansible_env.HOME}}/.bash_profile"
+    line: "alias kubectl='/usr/local/bin/kubectl'"
+
+- shell: source ~/.bash_profile
+
+  # - name: Create a directory if it does not exist
+  #   file:
+  #     path: ~/.kube/
+  #     state: directory
+  #     mode: '0755'
+  #   become: yes
+  #   become_user: freepsw
+
+  # - name: Copy a ".kube" directory on the remote machine for editing
+  #   copy:
+  #     src: "{{ansible_env.HOME}}/.kube/config"
+  #     dest: /home/freepsw/.kube/config
+  #     owner: freepsw
+  #     group: freepsw
+  #     mode: '0644'
+  #     remote_src: yes
+
+  # GPU check when nvidia_accelerator_enabled
+- name: Copy gpu check pod yml
+  copy:
+    src: gpu_pod.yml
+    dest: ~/gpu_pod.yml
+    mode: '0644'
+  when: nvidia_accelerator_enabled
+
+- shell: kubectl apply -f ~/gpu_pod.yml
+  when: nvidia_accelerator_enabled
+
+  # - name: Create a Deployment by reading the definition from a local file
+  #   k8s:
+  #     state: present
+  #     src: gpu_node.yml
+  #     wait: yes
+  #     wait_timeout: 300
+  #     wait_condition:
+  #       type: Complete
+  #       status: True
